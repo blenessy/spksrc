@@ -15,23 +15,18 @@ PID_FILE="${INSTALL_DIR}/var/oscam.pid"
 start_daemon ()
 {
     su - ${RUNAS} -c "${OSCAM} -b -c ${INSTALL_DIR}/var"
-    sleep 1
-    pidof -s oscam > ${PID_FILE}
+    wait_for_status 0 10
 }
 
 stop_daemon ()
 {
-    kill `cat ${PID_FILE}`
-    wait_for_status 1 20
-    rm -f ${PID_FILE}
+    killall "${PACKAGE}" 2>/dev/null
+    wait_for_status 1 10
 }
 
 daemon_status ()
 {
-    if [ -f ${PID_FILE} ] && [ -d /proc/`cat ${PID_FILE}` ]; then
-        return
-    fi
-    return 1
+    pidof "${PACKAGE}" >/dev/null
 }
 
 wait_for_status ()
